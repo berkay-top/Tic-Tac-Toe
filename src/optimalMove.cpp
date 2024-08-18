@@ -1,7 +1,6 @@
-#include <iostream>
 #include <vector>
 #include <tuple>
-#include "grid.hpp"
+#include "optimalMove.hpp"
 
 std::vector<cell> empty_cells(grid g)
 {
@@ -105,9 +104,4 @@ move optimalMove(grid currGrid)
     }
 
     return bestMove;
-}
-
-int main()
-{
-    std::cout << "Hello, World!\n";
 }

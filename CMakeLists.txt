@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 project(Tic-Tac-Toe)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # FTXUI -----------------------------------------
 include(FetchContent)
@@ -18,4 +19,5 @@ if(NOT ftxui_POPULATED)
 endif()
 
 # executables ------------------------------------
-add_executable(optimalMove src/optimalMove.cpp)
+add_executable(ttt src/gamePlay.cpp src/optimalMove.cpp)
+target_link_libraries(ttt PRIVATE ftxui::component)
