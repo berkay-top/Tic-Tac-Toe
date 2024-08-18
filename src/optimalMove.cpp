@@ -2,18 +2,18 @@
 #include <tuple>
 #include "optimalMove.hpp"
 
-std::vector<cell> empty_cells(grid g)
+std::vector<Cell> empty_cells(grid g)
 {
-    std::vector<cell> res;
+    std::vector<Cell> res;
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            if (g[i][j] == state::NoOne)
+            if (g[i][j] == State::NoOne)
                 res.push_back(std::make_pair(i, j));
 
     return res;
 }
 
-state check_win(grid g)
+Player check_win(grid g)
 {
     int c = 0;
     for (int i = 0; i < 3; i++)
@@ -35,70 +35,70 @@ state check_win(grid g)
         g[1][1] == g[2][0])
         return g[0][2];
 
-    return state::NoOne;
+    return Player::NoOne;
 }
 
-state minimax(grid currGrid, player currPlayer)
+Player minimax(grid currGrid, Player currPlayer)
 {
-    state Winner = check_win(currGrid);
-    if (Winner != state::NoOne)
+    Player Winner = check_win(currGrid);
+    if (Winner != Player::NoOne)
         return Winner;
 
     auto emptyCells = empty_cells(currGrid);
     if (emptyCells.empty())
-        return state::NoOne;
+        return Player::NoOne;
 
-    state bestState;
-    if (currPlayer == player::Computer)
+    Player bestCase;
+    if (currPlayer == Player::Computer)
     {
-        bestState = state::Player;
-        for (auto i : emptyCells)
+        bestCase = Player::Player;
+        for (auto cell : emptyCells)
         {
             int x, y;
-            std::tie(x, y) = i;
+            std::tie(x, y) = cell;
             
-            currGrid[x][y] = state::Computer;
-            state currState = minimax(currGrid, player::Player);
-            currGrid[x][y] = state::NoOne;
+            currGrid[x][y] = State::Computer;
+            Player currCase = minimax(currGrid, Player::Player);
+            currGrid[x][y] = State::NoOne;
 
-            bestState = std::max(bestState, currState);
+            bestCase = std::max(bestCase, currCase);
         }
     }
     else
     {
-        bestState = state::Computer;
-        for (auto i : emptyCells)
+        bestCase = Player::Computer;
+        for (auto cell : emptyCells)
         {
             int x, y;
-            std::tie(x, y) = i;
+            std::tie(x, y) = cell;
 
-            currGrid[x][y] = state::Player;
-            state currState = minimax(currGrid, player::Computer);
-            currGrid[x][y] = state::NoOne;
+            currGrid[x][y] = State::Player;
+            Player currCase = minimax(currGrid, Player::Computer);
+            currGrid[x][y] = State::NoOne;
 
-            bestState = std::min(bestState, currState);
+            bestCase = std::min(bestCase, currCase);
         }
     }
 
-    return bestState;
+    return bestCase;
 }
 
-move optimalMove(grid currGrid)
+Move optimalMove(grid currGrid)
 {
-    state bestState = state::Player;
-    move bestMove;
-    std::vector<cell> emptyCells = empty_cells(currGrid);
+    Player bestCase = Player::Player;
+    Move bestMove = {-1, -1};
+    std::vector<Cell> emptyCells = empty_cells(currGrid);
     for (auto cell : emptyCells)
     {
         int x, y;
         std::tie(x, y) = cell;
-        currGrid[x][y] = state::Computer;
-        state currState = minimax(currGrid, player::Player);
-        currGrid[x][y] = state::NoOne;
+        currGrid[x][y] = State::Computer;
+        Player currCase = minimax(currGrid, Player::Player);
+        currGrid[x][y] = State::NoOne;
 
-        if (currState > bestState)
+        if (currCase > bestCase)
         {
-            bestState = currState;
+            bestCase = currCase;
             bestMove = cell;
         }
     }
