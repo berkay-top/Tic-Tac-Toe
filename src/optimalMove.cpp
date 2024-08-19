@@ -1,107 +1,80 @@
 #include <vector>
-#include <tuple>
+#include <random>
+#include <chrono>
+#include <algorithm>
 #include "optimalMove.hpp"
 
-std::vector<Cell> empty_cells(grid g)
+Player Game::minimax(Grid grid, Player player)
 {
-    std::vector<Cell> res;
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (g[i][j] == State::NoOne)
-                res.push_back(std::make_pair(i, j));
-
-    return res;
-}
-
-Player check_win(grid g)
-{
-    int c = 0;
-    for (int i = 0; i < 3; i++)
-    {
-        if (g[i][0] == g[i][1] &&
-            g[i][1] == g[i][2])
-            return g[i][0];
-
-        if (g[0][i] == g[1][i] &&
-            g[1][i] == g[2][i])
-            return g[0][i];
-    }
-
-    if (g[0][0] == g[1][1] &&
-        g[1][1] == g[2][2])
-        return g[0][0];
-
-    if (g[0][2] == g[1][1] &&
-        g[1][1] == g[2][0])
-        return g[0][2];
-
-    return Player::NoOne;
-}
-
-Player minimax(grid currGrid, Player currPlayer)
-{
-    Player Winner = check_win(currGrid);
-    if (Winner != Player::NoOne)
-        return Winner;
-
-    auto emptyCells = empty_cells(currGrid);
-    if (emptyCells.empty())
-        return Player::NoOne;
+    if (CheckWin(grid) != Player::NoOne || std::count(begin(grid), end(grid), " "))
+        return CheckWin(grid);
 
     Player bestCase;
-    if (currPlayer == Player::Computer)
+    if (player == Player::Computer)
     {
         bestCase = Player::Player;
-        for (auto cell : emptyCells)
-        {
-            int x, y;
-            std::tie(x, y) = cell;
-            
-            currGrid[x][y] = State::Computer;
-            Player currCase = minimax(currGrid, Player::Player);
-            currGrid[x][y] = State::NoOne;
+        for (int i = 0; i < 9; i++)
+            if (grid[i] == " ")
+            {
+                grid[i] = computerSymbol;
+                Player currCase = minimax(grid, Player::Player);
+                grid[i] = " ";
 
-            bestCase = std::max(bestCase, currCase);
-        }
+                bestCase = std::max(currCase, bestCase);
+            }
     }
     else
     {
         bestCase = Player::Computer;
-        for (auto cell : emptyCells)
-        {
-            int x, y;
-            std::tie(x, y) = cell;
+        for (int i = 0; i < 9; i++)
+            if (grid[i] == " ")
+            {
+                grid[i] = computerSymbol;
+                Player currCase = minimax(grid, Player::Computer);
+                grid[i] = " ";
 
-            currGrid[x][y] = State::Player;
-            Player currCase = minimax(currGrid, Player::Computer);
-            currGrid[x][y] = State::NoOne;
-
-            bestCase = std::min(bestCase, currCase);
-        }
+                bestCase = std::min(currCase, bestCase);
+            }
     }
 
     return bestCase;
 }
 
-Move optimalMove(grid currGrid)
+Move Game::OptimalMoveHard()
 {
     Player bestCase = Player::Player;
-    Move bestMove = {-1, -1};
-    std::vector<Cell> emptyCells = empty_cells(currGrid);
-    for (auto cell : emptyCells)
-    {
-        int x, y;
-        std::tie(x, y) = cell;
-        currGrid[x][y] = State::Computer;
-        Player currCase = minimax(currGrid, Player::Player);
-        currGrid[x][y] = State::NoOne;
-
-        if (currCase > bestCase)
+    std::vector<Move> bestMoves;
+    for (int i = 0; i < 9; i++)
+        if (gameBoard[i] == " ")
         {
-            bestCase = currCase;
-            bestMove = cell;
-        }
-    }
+            gameBoard[i] = computerSymbol;
+            Player currCase = minimax(gameBoard, Player::Computer);
+            gameBoard[i] = " ";
 
-    return bestMove;
+            if (currCase > bestCase)
+            {
+                bestCase = currCase;
+                bestMoves.clear();
+                bestMoves.push_back(i);
+            }
+            else if (currCase == bestCase)
+                bestMoves.push_back(i);
+        }
+
+    std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_int_distribution<> rng(0, bestMoves.size() - 1);
+    return bestMoves[rng(gen)];
+}
+
+Move Game::OptimalMove(Player player)
+{
+    switch (difficulty)
+    {
+        case DifficultyLevel::Easy:
+            return OptimalMoveEasy();
+        case DifficultyLevel::Medium:
+            return OptimalMoveMedium();
+        default:
+            return OptimalMoveHard();
+    }
 }

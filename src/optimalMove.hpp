@@ -1,12 +1,25 @@
 #include <array>
-#include <utility>
+#include <string>
 
-enum class State {Player, NoOne, Computer};
-using Player = State;
+enum class Player {Player, NoOne, Computer};
+enum class DifficultyLevel {Easy, Medium, Hard};
 
-using Cell = std::pair<int, int>;
-using Move = Cell;
-using grid = std::array<std::array<State, 3>, 3>;
+using Move = int;
+using Grid = std::array<std::string, 9>;
 
-Player check_win(grid);
-Move optimalMove(grid);
+class Game
+{
+    DifficultyLevel difficulty;
+    std::string playerSymbol;
+    std::string computerSymbol;
+    Grid gameBoard;
+
+    Player minimax(Grid, Player);
+    Move OptimalMoveEasy();
+    Move OptimalMoveMedium();
+    Move OptimalMoveHard();
+
+public:
+    Player CheckWin(Grid) const;
+    Move OptimalMove(Player player);
+};

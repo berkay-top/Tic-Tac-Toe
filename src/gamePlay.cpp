@@ -7,82 +7,71 @@
 
 using namespace ftxui;
 
-ButtonOption Style() {
-    ButtonOption res;
-    res.transform = [](const EntryState& s) {
-        return text(s.label) | center | size(WIDTH, EQUAL, 3) | border;
-    };
-    return res;
-};
+std::string gameMode;
 
 int main()
 {
     auto screen = ScreenInteractive::FitComponent();
 
-    grid gameGrid;
-    for (auto& row : gameGrid)
-        std::fill(row.begin(), row.end(), State::NoOne);
+    bool gameOver = 0;
+    Components button;
 
-    std::array<std::string, 9> cell;
-    cell.fill(" ");
+    for (int i = 0; i < 9; i++)
+    {
+        auto onClick = [&, i]()
+        {
+            if (board[i] != " ")
+                return;
 
-    bool winnerFound = 0;
-    Player winner;
-    int c = 0;
-
-    auto button = [&] (int i) {
-        return Button(&cell[i], [&, i]() {
-            if (cell[i] == " ") {
-                cell[i] = "O";
-                gameGrid[i / 3][i % 3] = State::Player;
-                c++;
-
-                if (check_win(gameGrid) != Player::NoOne || c == 9)
-                {
-                    winnerFound = true;
-                    winner = check_win(gameGrid);
-                    screen.ExitLoopClosure()();
-                    return;
-                }
-
-                Move mv = optimalMove(gameGrid);
-                cell[mv.first * 3 + mv.second] = "X";
-                gameGrid[mv.first][mv.second] = State::Computer;
-                c++;
-
-                if (check_win(gameGrid) != Player::NoOne || c == 9)
-                {
-                    winnerFound = true;
-                    winner = check_win(gameGrid);
-                    screen.ExitLoopClosure()();
-                    return;
-                }
+            board[i] = playerLetter;
+            
+            if (moveCount == 9 || CheckWin(board) != Player::NoOne)
+            {
+                gameOver = 1;
+                screen.ExitLoopClosure()();
+                return;
             }
-        }, Style());
-    };
 
-    auto row1 = Container::Horizontal({ button(0), button(1), button(2) });
-    auto row2 = Container::Horizontal({ button(3), button(4), button(5) });
-    auto row3 = Container::Horizontal({ button(6), button(7), button(8) });
+            Move nextMove = OptimalMove(difficulty, board, computerLetter);
 
-    auto layout = Container::Vertical({ row1, row2, row3 });
+            if (moveCount == 9 || CheckWin(board, computerLetter) != Player::NoOne)
+            {
+                gameOver = 1;
+                screen.ExitLoopClosure()();
+                return;
+            }
+        };
 
-    auto renderer = Renderer(layout, [&]() {
-        if (winnerFound) {
-            if (winner == Player::Player)
-                return text("You won!") | bold;
-            else if (winner == Player::Computer)
-                return text("Skill issue!") | bold;
-            else
-                return text("Draw!") | bold;
-        }
+        button.push_back(Button(&board[i], onClick));
+    }
 
-        return vbox({
-            text("Tic-Tac-Toe") | bold | center,
+    auto r1 = Container::Horizontal({ button[0], button[1], button[2] });
+    auto r2 = Container::Horizontal({ button[0], button[1], button[2] });
+    auto r3 = Container::Horizontal({ button[0], button[1], button[2] });
+
+    auto buttonGrid = Container::Vertical({ r1, r2, r3 });
+
+    auto element = [&]()
+    {
+        Elements elements = {
+            text("Tic-Tac-Toe") | bold,
             separator(),
-            layout -> Render()
-        });
-    });
+            buttonGrid -> Render()
+        };
 
-    screen.Loop(renderer);
+        if (!gameOver)
+            return elements;
+
+        Element txt;
+        if (CheckWin(board) == Player::Computer)
+            txt = text("Skill issue!");
+        else if (CheckWin(board) == Player::Player)
+            txt = text("You won!");
+        else
+            txt = text("Draw!");
+
+        elements.push_back(txt | bold);
+
+        return elements;
+    };
 }
