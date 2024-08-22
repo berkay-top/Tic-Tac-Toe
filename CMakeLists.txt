@@ -19,5 +19,5 @@ if(NOT ftxui_POPULATED)
 endif()
 
 # executables ------------------------------------
-add_executable(ttt src/gamePlay.cpp src/optimalMove.cpp)
+add_executable(ttt src/main.cpp src/bestMove.cpp src/gridCheck.cpp)
 target_link_libraries(ttt PRIVATE ftxui::component)
