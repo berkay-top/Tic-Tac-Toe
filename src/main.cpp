@@ -12,11 +12,11 @@ ButtonOption Style()
     ButtonOption option;
     option.transform = [](const EntryState& s)
     {
-        auto element = text(s.label) | center | size(WIDTH, EQUAL, 3) | borderLight;
+        auto element = text(s.label) | center | size(WIDTH, EQUAL, 3) | border;
         if (s.focused)
-            element |= inverted;
+            element |= color(Color::White);
 
-        return element;
+        return element | color(Color::GrayDark);
     };
 
     return option;
@@ -33,13 +33,14 @@ int main()
 
     auto checkFinish = [&]()
     {
-        if (GetWinner(grid).compare(Computer) == 0)
+        auto winner = GetWinner(grid);
+        if (winner.compare(Computer) == 0)
         {
             gameOver = 1;
             screen.ExitLoopClosure()();
             return true;
         }
-        else if (GetWinner(grid).compare(Player) == 0)
+        else if (winner.compare(Player) == 0)
         {
             gameOver = 2;
             screen.ExitLoopClosure()();
@@ -78,22 +79,20 @@ int main()
 
     auto layout = Container::Vertical({r1, r2, r3});
 
-    auto renderer = Renderer(layout, [&]() {
-        Elements elements;
-        elements.push_back(text("Tic-Tac-Toe") | bold | center);
-        elements.push_back(separator());
-        elements.push_back(layout -> Render());
+    auto renderer = Renderer(layout, [&]()
+    {
+        if (gameOver == 0)
+            return window(text("Tic-Tac-Toe") | center, layout -> Render()) | color(Color::Blue);
 
+        Element txt;
         if (gameOver == 1)
-            elements.push_back(text("Skill issue!"));
+            txt = text("Skill issue!") | bold | center | border | flex | color(Color::Red);
         else if (gameOver == 2)
-            elements.push_back(text("You won!"));
+            txt = text("You won!") | bold | center | border | flex | color(Color::Green);
         else if (gameOver == 3)
-            elements.push_back(text("Draw!"));
+            txt = text("Draw!") | bold | center | border | flex | color(Color::Yellow);
 
-        *elements.rbegin() |= center;
-
-        return vbox(elements);
+        return vbox({window(text("Tic-Tac-Toe") | center, layout -> Render()) | color(Color::Blue), txt});
     });
 
     screen.Loop(renderer);
