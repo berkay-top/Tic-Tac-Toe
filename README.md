@@ -9,7 +9,7 @@ cmake .
 cmake --build .
 ```
 
-## Running
+## Running:
 ```
 ./ttt
 ```
