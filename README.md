@@ -10,4 +10,6 @@ cmake --build .
 ```
 
 ## Running
-`./ttt`
+```
+./ttt
+```
