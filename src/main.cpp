@@ -21,19 +21,19 @@ ButtonOption Style()
 
     return option;
 }
- 
 
-int main()
+void TicTacToe::GameUI()
 {
     auto screen = ScreenInteractive::FitComponent();
 
-    Grid grid; grid.fill(" ");
+    if (Computer == "X")
+        board[BestMove()] = Computer;
+
     int gameOver = 0;
-    Difficulty diff = Difficulty::HARD;
 
     auto checkFinish = [&]()
     {
-        auto winner = GetWinner(grid);
+        auto winner = GetWinner(board);
         if (winner.compare(Computer) == 0)
         {
             gameOver = 1;
@@ -46,7 +46,7 @@ int main()
             screen.ExitLoopClosure()();
             return true;
         }
-        else if (IsGridFull(grid))
+        else if (IsGridFull(board))
         {
             gameOver = 3;
             screen.ExitLoopClosure()();
@@ -58,16 +58,16 @@ int main()
 
     Components b(9);
     for (int i = 0; i < 9; i++)
-        b[i] = Button(&grid[i], [&, i]() {
-            if (grid[i] != " ")
+        b[i] = Button(&board[i], [&, i]() {
+            if (board[i] != " ")
                 return;
 
-            grid[i] = Player;
+            board[i] = Player;
 
             if (checkFinish())
                 return;
 
-            grid[BestMove(diff, grid)] = Computer;
+            board[BestMove()] = Computer;
 
             if (checkFinish())
                 return;
@@ -96,4 +96,41 @@ int main()
     });
 
     screen.Loop(renderer);
+}
+
+int main()
+{
+    auto screen = ScreenInteractive::TerminalOutput();
+    
+    int tg1_selected = 0, tg2_selected = 0;
+    std::vector<std::string> tg1_entries = {"Easy", "Medium", "Hard"};
+    std::vector<std::string> tg2_entries = {"X", "O"};
+    auto tg1 = Toggle(&tg1_entries, &tg1_selected);
+    auto tg2 = Toggle(&tg2_entries, &tg2_selected);
+
+    auto container = Container::Vertical({tg1, tg2});
+
+    auto renderer = Renderer(container, [&]() {
+        return vbox({
+            text("Choose game options, then press <Enter>:"),
+            text(""),
+            hbox(text("Difficulty: "), tg1 -> Render()),
+            hbox(text("Symbol (X goes first): "), tg2 -> Render())
+        });
+    });
+
+    auto component = CatchEvent(renderer, [&](Event event) {
+        if (event == Event::Return)
+        {
+            screen.ExitLoopClosure()();
+            return true;
+        }
+
+        return false;
+    });
+
+    screen.Loop(component);
+
+    TicTacToe game(static_cast<Difficulty>(tg1_selected), tg2_entries[tg2_selected]);
+    game.GameUI();
 }

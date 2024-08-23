@@ -2,7 +2,7 @@
 #include <random>
 #include <chrono>
 
-int minimax(Grid& g, bool isMaximizing)
+int TicTacToe::minimax(Grid& g, bool isMaximizing)
 {
     std::string winner = GetWinner(g);
     if (winner == Computer)
@@ -28,40 +28,40 @@ int minimax(Grid& g, bool isMaximizing)
     return bestScore;
 }
 
-Move BestMoveEasy(Grid g)
+int TicTacToe::BestMoveEasy(Grid grid)
 {
     std::vector<int> emptyCells;
     for (int i = 0; i < 9; i++)
-        if (g[i] == " ") emptyCells.push_back(i);
+        if (grid[i] == " ") emptyCells.push_back(i);
 
     std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<> dist(0, emptyCells.size() - 1);
     return emptyCells[dist(gen)];
 }
 
-Move BestMoveMedium(Grid g)
+int TicTacToe::BestMoveMedium(Grid grid)
 {
     std::vector<int> emptyCells;
     for (int i = 0; i < 9; i++)
-        if (g[i] == " ") emptyCells.push_back(i);
+        if (grid[i] == " ") emptyCells.push_back(i);
 
     std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<> dist(0, emptyCells.size() - 1);
     return emptyCells[dist(gen)];
 }
 
-Move BestMoveHard(Grid g)
+int TicTacToe::BestMoveHard(Grid grid)
 {
     int bestScore = -1;
-    std::vector<Move> bestMoves;
+    std::vector<int> bestMoves;
     for (int i = 0; i < 9; i++)
     {
-        if (g[i] != " ")
+        if (grid[i] != " ")
             continue;
 
-        g[i] = Computer;
-        int currScore = minimax(g, 0);
-        g[i] = " ";
+        grid[i] = Computer;
+        int currScore = minimax(grid, 0);
+        grid[i] = " ";
 
         if (currScore > bestScore)
         {
@@ -78,17 +78,17 @@ Move BestMoveHard(Grid g)
     return bestMoves[dist(gen)];
 }
 
-Move BestMove(Difficulty diff, Grid g)
+int TicTacToe::BestMove()
 {
-    switch (diff)
+    switch (difficulty)
     {
         case Difficulty::EASY:
-            return BestMoveEasy(g);
+            return BestMoveEasy(board);
             break;
         case Difficulty::MEDIUM:
-            return BestMoveMedium(g);
+            return BestMoveMedium(board);
             break;
         default:
-            return BestMoveHard(g);
+            return BestMoveHard(board);
     }
 }

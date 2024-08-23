@@ -1,7 +1,7 @@
 #include "options.hpp"
 #include <algorithm>
 
-std::string GetWinner(Grid g)
+std::string TicTacToe::GetWinner(Grid g)
 {
     for (int i = 0; i < 9; i += 3)
         if (g[i] == g[i + 1] &&
@@ -24,7 +24,7 @@ std::string GetWinner(Grid g)
     return " ";
 }
 
-bool IsGridFull(Grid g)
+bool TicTacToe::IsGridFull(Grid g)
 {
     return std::count(g.begin(), g.end(), " ") == 0;
 }
