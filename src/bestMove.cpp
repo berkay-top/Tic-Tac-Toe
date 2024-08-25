@@ -2,8 +2,11 @@
 #include <random>
 #include <chrono>
 
-int TicTacToe::minimax(Grid& g, bool isMaximizing)
+int TicTacToe::minimax(Grid& g, bool isMaximizing, int depth)
 {
+    if (depth == 10)
+        return 0;
+
     std::string winner = GetWinner(g);
     if (winner == Computer)
         return 1;
@@ -19,7 +22,7 @@ int TicTacToe::minimax(Grid& g, bool isMaximizing)
             continue;
 
         g[i] = isMaximizing ? Computer : Player;
-        int currScore = minimax(g, !isMaximizing);
+        int currScore = minimax(g, !isMaximizing, depth + 1);
         g[i] = " ";
 
         bestScore = isMaximizing ? std::max(bestScore, currScore) : std::min(bestScore, currScore);
@@ -28,40 +31,25 @@ int TicTacToe::minimax(Grid& g, bool isMaximizing)
     return bestScore;
 }
 
-int TicTacToe::BestMoveEasy(Grid grid)
+int TicTacToe::BestMove()
 {
-    std::vector<int> emptyCells;
-    for (int i = 0; i < 9; i++)
-        if (grid[i] == " ") emptyCells.push_back(i);
-
-    std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_int_distribution<> dist(0, emptyCells.size() - 1);
-    return emptyCells[dist(gen)];
-}
-
-int TicTacToe::BestMoveMedium(Grid grid)
-{
-    std::vector<int> emptyCells;
-    for (int i = 0; i < 9; i++)
-        if (grid[i] == " ") emptyCells.push_back(i);
-
-    std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_int_distribution<> dist(0, emptyCells.size() - 1);
-    return emptyCells[dist(gen)];
-}
-
-int TicTacToe::BestMoveHard(Grid grid)
-{
+    Grid g = board;
     int bestScore = -1;
     std::vector<int> bestMoves;
     for (int i = 0; i < 9; i++)
     {
-        if (grid[i] != " ")
+        if (g[i] != " ")
             continue;
 
-        grid[i] = Computer;
-        int currScore = minimax(grid, 0);
-        grid[i] = " ";
+        g[i] = Computer;
+        int currScore;
+        if (difficulty == Difficulty::HARD)
+            currScore = minimax(g, 0, 0);
+        else if (difficulty == Difficulty::MEDIUM)
+            currScore = minimax(g, 0, 5);
+        else
+            currScore = minimax(g, 0, 10);
+        g[i] = " ";
 
         if (currScore > bestScore)
         {
@@ -76,19 +64,4 @@ int TicTacToe::BestMoveHard(Grid grid)
     std::mt19937 gen(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<> dist(0, bestMoves.size() - 1);
     return bestMoves[dist(gen)];
-}
-
-int TicTacToe::BestMove()
-{
-    switch (difficulty)
-    {
-        case Difficulty::EASY:
-            return BestMoveEasy(board);
-            break;
-        case Difficulty::MEDIUM:
-            return BestMoveMedium(board);
-            break;
-        default:
-            return BestMoveHard(board);
-    }
 }

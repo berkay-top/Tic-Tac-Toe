@@ -73,9 +73,11 @@ void TicTacToe::GameUI()
                 return;
         }, Style());
 
-    auto r1 = Container::Horizontal({b[0], b[1], b[2]});
-    auto r2 = Container::Horizontal({b[3], b[4], b[5]});
-    auto r3 = Container::Horizontal({b[6], b[7], b[8]});
+    int j = 0;
+
+    auto r1 = Container::Horizontal({b[0], b[1], b[2]}, &j);
+    auto r2 = Container::Horizontal({b[3], b[4], b[5]}, &j);
+    auto r3 = Container::Horizontal({b[6], b[7], b[8]}, &j);
 
     auto layout = Container::Vertical({r1, r2, r3});
 

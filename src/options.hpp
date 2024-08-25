@@ -15,7 +15,7 @@ class TicTacToe
     std::string Computer;
     std::string Player;
 
-    int minimax(Grid&, bool);
+    int minimax(Grid&, bool isMaximizing, int depth);
     int BestMoveEasy(Grid);
     int BestMoveMedium(Grid);
     int BestMoveHard(Grid);
